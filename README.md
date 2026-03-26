@@ -26,3 +26,12 @@ If Apple's MPS hardware accelerators are availble, run
 python -c "import torch; print(f'MPS Available: {torch.backends.mps.is_available()}');"
 ```
 ```MPS Available``` should be set to ``` True```.
+
+# Venv
+If you don't want to both with any of that:
+```
+python -m venv venv
+source venv/bin/activate
+
+pip install -r requirements.txt
+```

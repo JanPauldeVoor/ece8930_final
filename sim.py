@@ -7,9 +7,9 @@ import cv2
 import time
 import os
 
-from utils.create_objects import *
-from utils.camera_rendering import render_camera
-from utils.environment_setup import environment_setup
+from utils.sim.create_objects import *
+from utils.sim.camera_rendering import render_camera
+from utils.sim.environment_setup import environment_setup
 
 # Setup environment
 pb, plane_id, table_id, so101_id, _ = environment_setup()

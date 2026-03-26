@@ -5,7 +5,7 @@ import cv2
 import os
 import time
 
-from utils.camera_rendering import render_d435
+from utils.sim.camera_rendering import render_d435
 
 os.makedirs("tasks/hw3_task1/calibration_images", exist_ok=True)
 os.makedirs("assets", exist_ok=True)

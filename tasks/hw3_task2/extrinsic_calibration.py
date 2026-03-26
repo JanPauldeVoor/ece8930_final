@@ -8,9 +8,9 @@ import math
 import time
 import os
 
-from utils.environment_setup import environment_setup
-from utils.create_objects import create_block
-from utils.camera_rendering import *
+from utils.sim.environment_setup import environment_setup
+from utils.sim.create_objects import create_block
+from utils.sim.camera_rendering import *
 
 def create_tag_mesh(filepath="assets/tag_mesh.obj"):
     """Generates a mathematically perfect 100mm x 100mm 3D quad with explicit UV mapping."""

@@ -8,10 +8,10 @@ import math
 import time
 import os
 
-from utils.camera_rendering import *
+from utils.sim.camera_rendering import *
 from utils.camera_transformations import *
-from utils.create_objects import *
-from utils.environment_setup import environment_setup
+from utils.sim.create_objects import *
+from utils.sim.environment_setup import environment_setup
 
 pb, plane_id, table_id, so101_id, _ = environment_setup()
 

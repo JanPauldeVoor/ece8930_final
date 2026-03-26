@@ -1,8 +1,10 @@
 # Simulation & Vision
 pybullet==3.2.7
 numpy<2.0.0
-opencv-python==4.8.1.78  
+opencv-python==4.8.1.78 
+opencv-contrib-python 
 pupil-apriltags
+pyrealsense2
 
 # LeRobot & Hugging Face
 hf-transfer

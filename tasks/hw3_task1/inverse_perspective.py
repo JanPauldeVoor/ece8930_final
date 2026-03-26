@@ -7,8 +7,8 @@ import math
 import time
 import os
 
-from utils.camera_rendering import render_camera,render_rgbd_camera
-from utils.create_objects import create_block
+from utils.sim.camera_rendering import render_camera,render_rgbd_camera
+from utils.sim.create_objects import create_block
 
 def find_blue_block(bgr_image):
     """Finds the (u, v) pixel coordinate of the blue block using HSV masking."""
