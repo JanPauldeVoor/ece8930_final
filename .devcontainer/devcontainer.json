@@ -1,0 +1,49 @@
+{
+    "name": "SO-101 Simulation Environment",
+    "build": {
+        "dockerfile": "../Dockerfile",
+        "context": "..",
+        "args": {
+            "BASE_IMAGE": "nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04",
+            "TORCH_INDEX_URL": "https://download.pytorch.org/whl/cu121"
+        }
+    },
+    
+    // Define the exact working directory inside the container
+    "workspaceFolder": "/app",
+    
+    // Map the current project folder on your host to /app in the container
+    "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+
+    // Translate our previous docker run flags into runArgs
+    "runArgs": [
+        "--gpus=all",
+        "--net=host",
+        "-e", "NVIDIA_DRIVER_CAPABILITIES=all",
+        "-e", "NVIDIA_VISIBLE_DEVICES=all",
+        "-v", "/tmp/.X11-unix:/tmp/.X11-unix",
+        "-v", "${localEnv:HOME}/.Xauthority:/root/.Xauthority"
+    ],
+
+    // Pull the DISPLAY environment variable from your WSL host
+    "containerEnv": {
+        "DISPLAY": "${localEnv:DISPLAY}"
+    },
+
+    // Optional but highly recommended: Pre-install VS Code extensions inside the container
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/bin/python"
+            },
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-toolsai.jupyter"
+            ]
+        }
+    },
+
+    // Keep the container running so VS Code can connect to it
+    "overrideCommand": false
+}

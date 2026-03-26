@@ -1,0 +1,18 @@
+# Simulation & Vision
+pybullet==3.2.7
+numpy<2.0.0
+opencv-python==4.8.1.78  
+pupil-apriltags
+
+# LeRobot & Hugging Face
+hf-transfer
+huggingface-hub[hf-xet]
+lerobot[dynamixel,intelrealsense] 
+
+# Open-VLA / Deep Learning Foundations
+transformers>=4.40.0
+accelerate>=0.29.0
+timm==1.0.26
+einops>=0.7.0
+bitsandbytes>=0.43.0
+scipy
