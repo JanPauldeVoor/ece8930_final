@@ -57,4 +57,6 @@ pip install -r requirements.txt
 /home/jdevoor/.conda/envs/so101-env/lib/python3.12/site-packages/lerobot/policies/groot/groot_n1.py"
 @dataclass(kw_only=True)
 
+
+https://huggingface.co/google/paligemma-3b-pt-224
 ```
