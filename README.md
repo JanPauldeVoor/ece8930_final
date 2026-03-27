@@ -35,3 +35,20 @@ source venv/bin/activate
 
 pip install -r requirements.txt
 ```
+
+# Build Palmetto Enivronment
+Instructions made with the ```cuuser_luyangz_ece_8930_advanced_robo``` account.
+## Conda setup
+```
+module add miniforge3/24.3.0-0
+conda init
+
+# Create environment
+conda create -y -n so101-env python=3.12
+conda activate so101-env
+
+# Prepare environment
+conda install ffmpeg=7.1.1 -c conda-forge
+
+pip install -r requirements.txt
+```

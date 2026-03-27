@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""
+Demo of teleoperation using MuJoCo viewer.
+This script allows you to control a robot arm in the SO100 environment using keyboard inputs.
+
+It's using MOCAP to control the end effector position and orientation.
+
+Does not record demonstrations, it's mostly to explore the mujoco scene.
+"""
+
+import mujoco
+import mujoco.viewer
+import numpy as np
+import pyquaternion as pyq
+import glfw
+
+from gym_so101.constants import ASSETS_DIR
+
+MOCAP_INDEX = 0
+
+def rotate_quaternion(quat, axis, angle):
+    """
+    Rotate a quaternion by an angle around an axis
+    """
+    angle_rad = np.deg2rad(angle)
+    axis = axis / np.linalg.norm(axis)
+    q = pyq.Quaternion(quat)
+    q = q * pyq.Quaternion(axis=axis, angle=angle_rad)
+    return q.elements
+
+
+def rotate_quaternion(quat, axis, angle):
+    """
+    Rotate a quaternion by an angle around an axis
+    """
+    angle_rad = np.deg2rad(angle)
+    axis = axis / np.linalg.norm(axis)
+    q = pyq.Quaternion(quat)
+    q = q * pyq.Quaternion(axis=axis, angle=angle_rad)
+    return q.elements
+
+
+def key_callback_data(key, data):
+    """
+    Callback for key presses but with data passed in
+
+    Args:
+        key: Key pressed
+        data: MjData object
+    
+    Returns:
+        None
+    """
+    global MOCAP_INDEX
+    print((key))
+    if key == 265:  # Up arrow - Y axis (+)
+        data.mocap_pos[MOCAP_INDEX, 2] += 0.01
+    elif key == 264:  # Down arrow - Y axis (-)
+        data.mocap_pos[MOCAP_INDEX, 2] -= 0.01
+    elif key == 263:  # Left arrow - Z axis (-)
+        data.mocap_pos[MOCAP_INDEX, 0] -= 0.01
+    elif key == 262:  # Right arrow - Z axis (+)
+        data.mocap_pos[MOCAP_INDEX, 0] += 0.01
+    elif key == 61:  # + - Y axis (+)
+        data.mocap_pos[MOCAP_INDEX, 1] += 0.01
+    elif key == 45:  # - - Y axis (-)
+        data.mocap_pos[MOCAP_INDEX, 1] -= 0.01
+    # Rotation around X-axis (Pitch)
+    elif key == 81:  # Q key (rotate +10 around X)
+        data.mocap_quat[MOCAP_INDEX] = rotate_quaternion(
+            data.mocap_quat[MOCAP_INDEX], [1, 0, 0], 10
+        )
+    elif key == 65:  # A key (rotate -10 around X)
+        data.mocap_quat[MOCAP_INDEX] = rotate_quaternion(
+            data.mocap_quat[MOCAP_INDEX], [1, 0, 0], -10
+        )
+
+    # Rotation around Y-axis (Yaw)
+    elif key == 87:  # W key (rotate +10 around Y)
+        data.mocap_quat[MOCAP_INDEX] = rotate_quaternion(
+            data.mocap_quat[MOCAP_INDEX], [0, 1, 0], 10
+        )
+    elif key == 83:  # S key (rotate -10 around Y)
+        data.mocap_quat[MOCAP_INDEX] = rotate_quaternion(
+            data.mocap_quat[MOCAP_INDEX], [0, 1, 0], -10
+        )
+
+    # Rotation around Z-axis (Roll)
+    elif key == 69:  # E key (rotate +10 around Z)
+        data.mocap_quat[MOCAP_INDEX] = rotate_quaternion(
+            data.mocap_quat[MOCAP_INDEX], [0, 0, 1], 10
+        )
+    elif key == 68:  # D key (rotate -10 around Z)
+        data.mocap_quat[MOCAP_INDEX] = rotate_quaternion(
+            data.mocap_quat[MOCAP_INDEX], [0, 0, 1], -10
+        )
+
+    elif key == glfw.KEY_5:  # gripper open up
+        data.ctrl[5] += 0.05
+    elif key == glfw.KEY_6:  # gripper close down
+        data.ctrl[5] -= 0.05
+    else:
+        print(f"Unmapped Key: {key}")
+
+def print_keybind() -> None:
+    print("===========================")
+    print(f"TELEOPERATION KEYBINDING")
+    print("===========================")
+    print(
+        "Up Arrow: Y Axis +\n" \
+        "Down Arrow: Y Axis -\n" \
+        "Left Arrow: Z Axis -\n" \
+        "Right Arrow: Z Axis +\n" \
+        "")
+
+def main():
+    xml_path = ASSETS_DIR / "scene.xml"
+    model = mujoco.MjModel.from_xml_path(str(xml_path))
+    data = mujoco.MjData(model)
+
+    mujoco.mj_forward(model, data)
+    gripper_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "gripper")
+    data.mocap_pos[MOCAP_INDEX] = data.xpos[gripper_id]
+    data.mocap_quat[MOCAP_INDEX] = data.xquat[gripper_id]
+
+    def key_callback(key):
+        key_callback_data(key, data)
+
+    with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as viewer:
+        while viewer.is_running():
+            mujoco.mj_step(model, data)
+            viewer.sync()
+
+
+if __name__ == "__main__":
+    main()
