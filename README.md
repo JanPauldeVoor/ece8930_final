@@ -52,3 +52,9 @@ conda install ffmpeg=7.1.1 -c conda-forge
 
 pip install -r requirements.txt
 ```
+
+```
+/home/jdevoor/.conda/envs/so101-env/lib/python3.12/site-packages/lerobot/policies/groot/groot_n1.py"
+@dataclass(kw_only=True)
+
+```
