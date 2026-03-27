@@ -1,6 +1,7 @@
 #!/bin/bash
 
-export HF_HUB_OFFLINE=1
+#export HF_HUB_OFFLINE=1
+export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
 
 lerobot-train \
     --dataset.repo_id=local_datasets/so101_touch_cube \
@@ -17,6 +18,6 @@ lerobot-train \
     --policy.dtype=bfloat16 \
     --policy.freeze_vision_encoder=false \
     --policy.train_expert_only=false \
-    --steps=1000 \
+    --steps=3000 \
     --policy.device=cuda \
-    --batch_size=2
+    --batch_size=8
