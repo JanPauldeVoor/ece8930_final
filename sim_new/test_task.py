@@ -16,7 +16,7 @@ env = gym.make(
 observation, info = env.reset()
 frames = []
 
-for _ in range(1000):
+for _ in range(5):
     action = env.action_space.sample()
     observation, reward, terminated, truncated, info = env.step(action)
     image = env.render()
@@ -27,22 +27,6 @@ for _ in range(1000):
     if terminated or truncated:
         observation, info = env.reset()
 
-    # print("\n--- CHECKING OBSERVATION SPACE ---")
-    # for key, value in observation.items():
-    #     space = env.observation_space[key]
-    #     is_valid = space.contains(value)
-    #     print(f"Key: {key} | Valid: {is_valid}")
-    #     if not is_valid:
-    #         print(f"  -> Expected shape: {space.shape}, Got: {value.shape}")
-    #         print(f"  -> Expected dtype: {space.dtype}, Got: {value.dtype}")
-    #         # Check if values are out of bounds
-    #         out_of_bounds_low = value < space.low
-    #         out_of_bounds_high = value > space.high
-    #         if out_of_bounds_low.any() or out_of_bounds_high.any():
-    #             print(f"  -> VALUES OUT OF BOUNDS!")
-    #             print(f"     Min allowed: {space.low.min()}, Max allowed: {space.high.max()}")
-    #             print(f"     Actual Min: {value.min()}, Actual Max: {value.max()}")
-    # print("----------------------------------\n")
 
 env.close()
 imageio.mimsave("outputs/example.mp4", np.stack(frames), fps=25)

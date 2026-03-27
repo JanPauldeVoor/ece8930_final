@@ -63,10 +63,6 @@
 
     </worldbody>
 
-    <equality>
-        <weld body1="mocap_target" body2="gripper" />
-    </equality>
-
      <keyframe>
         <key name="home" qpos="0 -1.57 1.57 1.57 -1.57 0.  0.2 0.5 0.05 1 0 0 0"
             ctrl="0 -1.57 1.57 1.57 -1.57 0" />

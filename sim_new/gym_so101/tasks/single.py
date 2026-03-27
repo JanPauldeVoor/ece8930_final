@@ -7,7 +7,7 @@ from dm_control.rl import control
 from gym_so101.constants import SO101_START_ARM_POSE, unnormalize_so101
 
 # Global variable used by env.py to pass the randomized pose down to the task
-BOX_POSE = [None, None] 
+BOX_POSE = [None]
 
 
 """
@@ -40,6 +40,9 @@ class SO101Task(base.Task):
         action = action.copy()
         left_arm_action = action[:self.ARM_DOF+1]
         env_action = unnormalize_so101(left_arm_action)
+        
+        physics.data.ctrl[:6] = env_action
+        
         super().before_step(env_action, physics)
     
     def initialize_episode(self, physics):
@@ -161,9 +164,10 @@ class SO101TouchCubeTask(SO101Task):
 
         CUBE_GEOM = "red_block"
         TABLE_GEOM = "table"
-        FIXED_FINGER_GEOMS = {f"fixed_jaw_pad_{i}" for i in range(1, 5)}
-        MOVING_FINGER_GEOMS = {f"moving_jaw_pad_{i}" for i in range(1, 5)}
-        FINGERTIP_GEOMS = FIXED_FINGER_GEOMS | MOVING_FINGER_GEOMS
+        FIXED_FINGER_GEOMS = {f"fixed_jaw_{i}" for i in range(1, 3)}
+        MOVING_FINGER_GEOMS = {f"moving_jaw_1"}
+        FINGERTIP_GEOMS =  MOVING_FINGER_GEOMS | FIXED_FINGER_GEOMS
+        # print(FINGERTIP_GEOMS)
 
         # return whether left gripper is holding the box
         all_contact_pairs = []
@@ -175,11 +179,13 @@ class SO101TouchCubeTask(SO101Task):
             contact_pair = (name_geom_1, name_geom_2)
             all_contact_pairs.append(contact_pair)
 
+        # print(all_contact_pairs)
         touch_gripper = any(
             (g1 in FINGERTIP_GEOMS and g2 == CUBE_GEOM)
             or (g2 in FINGERTIP_GEOMS and g1 == CUBE_GEOM)
             for (g1, g2) in all_contact_pairs
         )
+
 
         touch_table = (CUBE_GEOM, TABLE_GEOM) in all_contact_pairs
 
@@ -207,8 +213,8 @@ class SO101TouchCubeTask(SO101Task):
         # Add contact bonus (already have the code!)
         if touch_gripper:
             reward += 1.0  # Big bonus for actually touching
-
-        success = touch_gripper and ee_cube_dist < 0.05
+        # print(f"DIST GRIP TO CUBE: {ee_cube_dist:02f} TOUCH GRIP: {touch_gripper}")
+        success = touch_gripper and ee_cube_dist < 0.07
         if success:
             print("SUCCESS!")
             return self.max_reward

@@ -19,8 +19,8 @@ from gym_so101.tasks.single import (
 )
 
 def sample_so101_box_pose(seed=None):
-    x_range = [-0.25, -0.15]
-    y_range = [0.3, 0.6]
+    x_range = [0.15, 0.2]
+    y_range = [-.1, 0.1]
     z_range = [0.05, 0.05]
 
     rng = np.random.RandomState(seed)
@@ -59,6 +59,12 @@ class SO101Env(gym.Env):
             self.observation_space = spaces.Dict(
                 {
                     "observation.images.workspace_cam": spaces.Box(
+                        low=0,
+                        high=255,
+                        shape=(3, self.observation_height, self.observation_width),
+                        dtype=np.uint8,
+                    ),
+                    "observation.images.wrist_cam": spaces.Box(
                         low=0,
                         high=255,
                         shape=(3, self.observation_height, self.observation_width),
@@ -130,12 +136,19 @@ class SO101Env(gym.Env):
 
     def _format_raw_obs(self, raw_obs):
         if self.obs_type == "so101_pixels_agent_pos":
-            img_workspace = raw_obs["images"]["workspace_cam"].copy()
-            img_workspace = np.transpose(img_workspace, (2, 0, 1))
+            workspace_img = raw_obs["images"]["workspace_cam"].copy()
+            workspace_img = np.transpose(workspace_img, (2, 0, 1))
+
+            # Process Wrist Cam
+            wrist_img = raw_obs["images"]["wrist_cam"].copy()
+            wrist_img = np.transpose(wrist_img, (2, 0, 1))
+
             obs = {
-                "observation.images.workspace_cam": img_workspace, # Must be uint8
+                "observation.images.workspace_cam": workspace_img,
+                "observation.images.wrist_cam": wrist_img,
                 "observation.state": raw_obs["qpos"].astype(np.float32), 
             }
+            return obs
         elif self.obs_type == "so101_state":
             obs = np.concatenate(
             [
@@ -273,7 +286,7 @@ class SO100GoalEnv(gym.Env):
 
         xml_path = ASSETS_DIR / "scene.xml"
         physics = mujoco.Physics.from_xml_path(str(xml_path))
-        task = SO101SortingTask(
+        task = SO101TouchCubeTask(
             observation_width=self.observation_width,
             observation_height=self.observation_height,
         )
