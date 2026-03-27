@@ -53,51 +53,52 @@ def key_callback_data(key, data):
     """
     global MOCAP_INDEX
     print((key))
-    if key == 265:  # Up arrow - Y axis (+)
+    if key == 325:  # Up arrow - Y axis (+)
         data.mocap_pos[MOCAP_INDEX, 2] += 0.01
-    elif key == 264:  # Down arrow - Y axis (-)
+    elif key == 322:  # Down arrow - Y axis (-)
         data.mocap_pos[MOCAP_INDEX, 2] -= 0.01
-    elif key == 263:  # Left arrow - Z axis (-)
+    elif key == 321:  # Left arrow - Z axis (-)
         data.mocap_pos[MOCAP_INDEX, 0] -= 0.01
-    elif key == 262:  # Right arrow - Z axis (+)
+    elif key == 323:  # Right arrow - Z axis (+)
         data.mocap_pos[MOCAP_INDEX, 0] += 0.01
-    elif key == 61:  # + - Y axis (+)
+    elif key == 326:  # + - Y axis (+)
         data.mocap_pos[MOCAP_INDEX, 1] += 0.01
-    elif key == 45:  # - - Y axis (-)
+    elif key == 324:  # - - Y axis (-)
         data.mocap_pos[MOCAP_INDEX, 1] -= 0.01
+
     # Rotation around X-axis (Pitch)
-    elif key == 81:  # Q key (rotate +10 around X)
+    elif key == 320:  # Q key (rotate +10 around X)
         data.mocap_quat[MOCAP_INDEX] = rotate_quaternion(
             data.mocap_quat[MOCAP_INDEX], [1, 0, 0], 10
         )
-    elif key == 65:  # A key (rotate -10 around X)
+    elif key == 330:  # A key (rotate -10 around X)
         data.mocap_quat[MOCAP_INDEX] = rotate_quaternion(
             data.mocap_quat[MOCAP_INDEX], [1, 0, 0], -10
         )
 
     # Rotation around Y-axis (Yaw)
-    elif key == 87:  # W key (rotate +10 around Y)
+    elif key == 327:  # W key (rotate +10 around Y)
         data.mocap_quat[MOCAP_INDEX] = rotate_quaternion(
             data.mocap_quat[MOCAP_INDEX], [0, 1, 0], 10
         )
-    elif key == 83:  # S key (rotate -10 around Y)
+    elif key == 329:  # S key (rotate -10 around Y)
         data.mocap_quat[MOCAP_INDEX] = rotate_quaternion(
             data.mocap_quat[MOCAP_INDEX], [0, 1, 0], -10
         )
 
     # Rotation around Z-axis (Roll)
-    elif key == 69:  # E key (rotate +10 around Z)
+    elif key == 331:  # E key (rotate +10 around Z)
         data.mocap_quat[MOCAP_INDEX] = rotate_quaternion(
             data.mocap_quat[MOCAP_INDEX], [0, 0, 1], 10
         )
-    elif key == 68:  # D key (rotate -10 around Z)
+    elif key == 328:  # D key (rotate -10 around Z)
         data.mocap_quat[MOCAP_INDEX] = rotate_quaternion(
             data.mocap_quat[MOCAP_INDEX], [0, 0, 1], -10
         )
 
-    elif key == glfw.KEY_5:  # gripper open up
+    elif key == 334:  # gripper open up
         data.ctrl[5] += 0.05
-    elif key == glfw.KEY_6:  # gripper close down
+    elif key == 335:  # gripper close down
         data.ctrl[5] -= 0.05
     else:
         print(f"Unmapped Key: {key}")
@@ -105,12 +106,14 @@ def key_callback_data(key, data):
 def print_keybind() -> None:
     print("===========================")
     print(f"TELEOPERATION KEYBINDING")
+    print(f"NUMPAD IS REQUIRED")
     print("===========================")
     print(
-        "Up Arrow: Y Axis +\n" \
-        "Down Arrow: Y Axis -\n" \
-        "Left Arrow: Z Axis -\n" \
-        "Right Arrow: Z Axis +\n" \
+        "ALL KEYS ASSIGNED ON NUMPAD\n"\
+        "5: Y Axis +\n" \
+        "2: Y Axis -\n" \
+        "1: Z Axis -\n" \
+        "3: Z Axis +\n" \
         "")
 
 def main():

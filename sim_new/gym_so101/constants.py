@@ -12,7 +12,7 @@ DT = 0.02  # 0.02 ms -> 1/0.2 = 50 hz
 FPS = 50
 
 
-SO100_JOINTS = [
+SO101_JOINTS = [
     # absolute joint position
     "left_arm_waist",
     "left_arm_shoulder",
@@ -22,7 +22,7 @@ SO100_JOINTS = [
     "left_arm_gripper",
 ]
 
-SO100_ACTIONS = [
+SO101_ACTIONS = [
     # action names
     "left_arm_waist",
     "left_arm_shoulder",
@@ -36,7 +36,7 @@ SO100_ACTIONS = [
 bin_min = np.array([-0.25, 0.7, 0.01], dtype=np.float32)
 bin_max = np.array([-0.14, 0.76, 0.05], dtype=np.float32)
 
-SO100_START_ARM_POSE = [
+SO101_START_ARM_POSE = [
     0.0,  # left_arm_waist
     -0.96,  # left_arm_shoulder
     1.16,  # left_arm_elbow
@@ -82,7 +82,7 @@ def normalize(num, min_val, max_val, target_min=-1, target_max=1):
     return np.clip(scaled, target_min, target_max)
 
 
-def unnormalize_so100(action):
+def unnormalize_so101(action):
     action[0] = unnormalize(action[0], -1.92, 1.92)  # rotation around the waist
     action[1] = unnormalize(action[1], -3.32, 0.174) # arm shoulder
     action[2] = unnormalize(action[2], -0.174, 3.14)  # elbow

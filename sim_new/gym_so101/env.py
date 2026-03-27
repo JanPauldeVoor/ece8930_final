@@ -5,16 +5,17 @@ from dm_control.rl import control
 from gymnasium import spaces
 
 from gym_so101.constants import (
-    SO100_ACTIONS,
+    SO101_ACTIONS,
     ASSETS_DIR,
     DT,
-    SO100_JOINTS,
+    SO101_JOINTS,
     bin_min,
     bin_max,
 )
 from gym_so101.tasks.single import (
     BOX_POSE,
-    SO101SortingTask
+    SO101SortingTask,
+    SO101TouchCubeTask
 )
 
 def sample_so101_box_pose(seed=None):
@@ -57,16 +58,16 @@ class SO101Env(gym.Env):
         if self.obs_type == "so101_pixels_agent_pos":
             self.observation_space = spaces.Dict(
                 {
-                    "pixels": spaces.Box(
+                    "observation.images.workspace_cam": spaces.Box(
                         low=0,
                         high=255,
-                        shape=(self.observation_height, self.observation_width, 3),
+                        shape=(3, self.observation_height, self.observation_width),
                         dtype=np.uint8,
                     ),
-                    "agent_pos": spaces.Box(
+                    "observation.state": spaces.Box(
                         low=-10.0,
                         high=10.0,
-                        shape=(len(SO100_JOINTS),),
+                        shape=(len(SO101_JOINTS),),
                         dtype=np.float32,
                     ),
                 }
@@ -75,12 +76,12 @@ class SO101Env(gym.Env):
             self.observation_space = spaces.Box(
                 low=-100.0,
                 high=100.0,
-                shape=(len(SO100_JOINTS) + 3 * 3,),  # joints + box + bin + ee
+                shape=(len(SO101_JOINTS) + 3 * 3,),  # joints + box + bin + ee
                 dtype=np.float32,
             )
 
         self.action_space = spaces.Box(
-            low=-1, high=1, shape=(len(SO100_ACTIONS),), dtype=np.float32
+            low=-1, high=1, shape=(len(SO101_ACTIONS),), dtype=np.float32
         )
 
     def render(self):
@@ -107,6 +108,13 @@ class SO101Env(gym.Env):
                 observation_width=self.observation_width,
                 observation_height=self.observation_height,
             )
+        elif task_name == "so101_touch_cube":
+            xml_path = ASSETS_DIR / "scene.xml"
+            physics = mujoco.Physics.from_xml_path(str(xml_path))
+            task = SO101TouchCubeTask(
+                observation_width=self.observation_width,
+                observation_height=self.observation_height,
+            )
         else:
             raise NotImplementedError(task_name)
 
@@ -122,31 +130,32 @@ class SO101Env(gym.Env):
 
     def _format_raw_obs(self, raw_obs):
         if self.obs_type == "so101_pixels_agent_pos":
-            rgb = raw_obs["images"]["workspace_cam"].copy()
+            img_workspace = raw_obs["images"]["workspace_cam"].copy()
+            img_workspace = np.transpose(img_workspace, (2, 0, 1))
             obs = {
-                "pixels": rgb,
-                "agent_pos": raw_obs["qpos"].astype(np.float32),  # SO100 uses float32,
+                "observation.images.workspace_cam": img_workspace, # Must be uint8
+                "observation.state": raw_obs["qpos"].astype(np.float32), 
             }
         elif self.obs_type == "so101_state":
             obs = np.concatenate(
-                [
-                    raw_obs["box_position"],
-                    raw_obs["bin_position"],
-                    raw_obs["ee_position"],
-                    raw_obs["qpos"].astype(np.float32),  # SO100 uses float32,
-                ]
-            )
+            [
+                raw_obs["red_block_position"].astype(np.float32), 
+                raw_obs["ee_position"].astype(np.float32),        
+                raw_obs["qpos"].astype(np.float32), 
+            ]
+        )
         return obs
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
 
-        # TODO(rcadene): how to seed the env?
         if seed is not None:
             self._env.task.random.seed(seed)
             self._env.task._random = np.random.RandomState(seed)
 
         if self.task == "SO101Sorting":
+            BOX_POSE[0] = sample_so101_box_pose(seed)  # used in sim reset
+        if self.task == "so101_touch_cube":
             BOX_POSE[0] = sample_so101_box_pose(seed)  # used in sim reset
         else:
             raise ValueError(self.task)
@@ -206,7 +215,7 @@ class SO100GoalEnv(gym.Env):
         goal_dim = 3  # x, y, z coordinates of the goal
 
         pixels_flat_size = observation_height * observation_width * 3
-        agent_pos_size = len(SO100_JOINTS)
+        agent_pos_size = len(SO101_JOINTS)
         obs_size = pixels_flat_size + agent_pos_size
 
         obs_space = spaces.Box(
@@ -227,7 +236,7 @@ class SO100GoalEnv(gym.Env):
         )
 
         self.action_space = spaces.Box(
-            low=-1, high=1, shape=(len(SO100_ACTIONS),), dtype=np.float32
+            low=-1, high=1, shape=(len(SO101_ACTIONS),), dtype=np.float32
         )
 
         # Goal sampling parameters
@@ -254,8 +263,8 @@ class SO100GoalEnv(gym.Env):
         return image
 
     def _flatten_observation(self, base_obs):
-        pixels_flat = base_obs["pixels"].flatten().astype(np.float32) / 255.0
-        agent_pos = base_obs["agent_pos"].astype(np.float32)
+        pixels_flat = base_obs["observation.images.workspace_cam"].flatten().astype(np.float32) / 255.0
+        agent_pos = base_obs["observation.state"].astype(np.float32)
         return np.concatenate([pixels_flat, agent_pos])
 
     def _make_env_task(self, task):
@@ -280,12 +289,15 @@ class SO100GoalEnv(gym.Env):
         return env
 
     def _format_raw_obs(self, raw_obs):
-        rgb = raw_obs["images"]["workspace_cam"].copy()
+        img_workspace = raw_obs["images"]["workspace_cam"].copy()
+            
+        # 2. Transpose from (H, W, C) to (C, H, W)
+        img_workspace = np.transpose(img_workspace, (2, 0, 1))
+        
         obs = {
-            "pixels": rgb,
-            "agent_pos": raw_obs["qpos"].astype(np.float32),  # SO100 uses float32,
+            "observation.images.workspace_cam": img_workspace, # Must be uint8
+            "observation.state": raw_obs["qpos"].astype(np.float32), 
         }
-
         return obs
 
     def reset(self, seed=None, options=None):
@@ -324,8 +336,8 @@ class SO100GoalEnv(gym.Env):
 
     def _extract_achieved_goal(self):
         """Extract current cube position from physics"""
-        cube_pos = self._env.task.get_cube_position(self._env.physics)
-        return cube_pos.copy()
+        cube_pos = self._env.task.get_red_cube_position(self._env.physics)
+        return cube_pos.copy().astype(np.float32)
 
     def compute_reward(self, achieved_goal, desired_goal, info):
         """Compute sparse reward for HER"""
