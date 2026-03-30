@@ -53,10 +53,10 @@ if __name__ == "__main__":
 
     # 2. Create some dummy 2D pixel coordinates
     mock_2d_points = np.array([
+        [404.38132, 272.62088], 
+        [340.2643, 278.6888],
         [334.63794, 217.59282], 
         [397.1244, 211.57385], 
-        [404.38132, 272.62088], 
-        [340.2643, 278.6888]
     ], dtype=np.float32)
 
     # 3. Load your real intrinsic matrix and distortion coefficients 
