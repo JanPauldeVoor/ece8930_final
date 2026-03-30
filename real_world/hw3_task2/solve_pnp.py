@@ -45,10 +45,10 @@ def calculate_extrinsics(points_3d, points_2d, K_matrix, dist_coeffs):
 if __name__ == "__main__":
     # 1. Create some dummy 3D physical points (meters)
     mock_3d_points = np.array([
-        [0.50, 0.20, 0.10], 
-        [0.50, 0.12, 0.10], 
-        [0.42, 0.12, 0.10], 
-        [0.42, 0.20, 0.10]
+        [0.32653847, 0.11015416, -0.00604819], 
+        [0.33453725, 0.0350426, -0.00893483], 
+        [0.25334541, 0.026215, -0.0067451], 
+        [0.24002469, 0.09763895, -0.01287102]
     ], dtype=np.float32)
 
     # 2. Create some dummy 2D pixel coordinates
