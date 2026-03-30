@@ -1,7 +1,7 @@
 # Simulation
 lerobot[aloha,feetech,intelrealsense,pi]
 gym-hil
-# pybullet
+pybullet
 
 # Vision
 opencv-python 

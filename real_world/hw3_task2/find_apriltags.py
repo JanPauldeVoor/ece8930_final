@@ -57,5 +57,5 @@ def detect_apriltag_corners(image_path):
     return None
 
 # --- Mock Test ---
-# corners_2d = detect_apriltag_corners("path/to/test/image.png")
-# print(corners_2d)
+corners_2d = detect_apriltag_corners("real_world/hw3_task1/calibration_images/april_tag/calib_00.png")
+print(corners_2d)

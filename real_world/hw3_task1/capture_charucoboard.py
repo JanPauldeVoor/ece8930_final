@@ -4,9 +4,9 @@ import cv2
 
 from utils.realsense_camera import init_realsense
 
-IMAGE_FOLDER = "real_world/hw3_task1/calibration_images/"
+IMAGE_FOLDER = "real_world/hw3_task1/calibration_images/april_tag/"
 
-pipeline, config = init_realsense(rgb_stream=True, depth_stream=False)
+pipeline, config = init_realsense(rgb_stream=True, depth_stream=True)
 if pipeline == None or config == None:
     print("ERROR: could not initalize realsense camera")
     exit(0)

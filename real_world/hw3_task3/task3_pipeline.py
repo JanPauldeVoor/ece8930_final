@@ -39,20 +39,11 @@ if __name__ == "__main__":
     
     # 2. Mock Intrinsic Matrix (K) from Task 1.1
     # Replace with np.load("k.npy") when running your real pipeline
-    mock_K = np.array([
-        [615.0,   0.0, 325.0],
-        [  0.0, 615.0, 245.0],
-        [  0.0,   0.0,   1.0]
-    ])
+    mock_K = np.load("../hw3_task1/k.npy")
 
     # 3. Mock Extrinsic Matrix (T_base_D435) from Task 2.3
     # This is the inverted 4x4 matrix output from your solvePnP script
-    mock_T_base_D435 = np.array([
-        [ 0.0, -1.0,  0.0,  0.45],  # 90 deg rotation, 0.45m translation in X
-        [ 1.0,  0.0,  0.0,  0.10],  # 0.10m translation in Y
-        [ 0.0,  0.0,  1.0, -0.05],  # -0.05m translation in Z (height offset)
-        [ 0.0,  0.0,  0.0,  1.00]
-    ])
+    mock_T_base_D435 = np.load("../hw3_task2/t_base_d435.npy")
 
     # --- Execute Pipeline ---
     
