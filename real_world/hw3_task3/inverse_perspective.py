@@ -68,20 +68,18 @@ def main():
             depth_image = np.asanyarray(depth_frame.get_data())
             color_image = np.asanyarray(color_frame.get_data())
             
-            # 1. Find the Pixel
+            # Find the block
             u, v = find_orange_block(color_image)
             
             if u is not None and v is not None:
-                # 2. Read Depth (convert from mm to meters if necessary depending on your camera scale)
-                # Note: RealSense depth is usually in mm, we need meters for our math.
-                depth_scale = pipeline.get_active_profile().get_device().first_depth_sensor().get_depth_scale()
-                Z_c = depth_frame.get_distance(u, v) # get_distance safely returns meters
+                # Read Depth 
+                Z_c = depth_frame.get_distance(u, v) 
                 
                 if Z_c > 0:
-                    # 3. Apply Intrinsic Math (Task 1.3)
+                    # Apply Intrinsic Matrix (Task 1.3)
                     P_D435 = pixel_to_camera_frame(u, v, Z_c, K_matrix)
                     
-                    # 4. Apply Extrinsic Math (Task 3)
+                    # Apply Extrinsic Matrix (Task 3)
                     P_base = camera_to_base_frame(P_D435, T_base_D435)
                     
                     print(f"Target found at Pixel ({u}, {v}) with depth {Z_c:.3f}m")

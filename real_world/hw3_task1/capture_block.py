@@ -48,7 +48,7 @@ def pixel_to_camera_frame(u, v, Z_c, f_x, f_y, c_x, c_y):
     return np.array([X_c, Y_c, Z_c, 1.0]) # Homogenous coordinate
 
 def camera_to_world_frame(Z_c, u, c_x,  f_x, v, c_y, f_y):
-    """Transforms camera-relative coordinates to PyBullet world coordinates."""
+    """Transforms camera-relative coordinates to world coordinates."""
     X_c = ((u-c_x)*Z_c)/f_x
     Y_c = ((v-c_y)*Z_c)/f_y
 

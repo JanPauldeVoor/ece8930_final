@@ -1,5 +1,5 @@
 # Simulation
-lerobot[aloha,feetech,intelrealsense,pi]
+lerobot[aloha,feetech,intelrealsense,pi]==0.5.0
 gym-hil
 pybullet
 

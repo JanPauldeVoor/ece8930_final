@@ -27,16 +27,8 @@ python -c "import torch; print(f'MPS Available: {torch.backends.mps.is_available
 ```
 ```MPS Available``` should be set to ``` True```.
 
-# Venv
-If you don't want to both with any of that:
-```
-python -m venv venv
-source venv/bin/activate
 
-pip install -r requirements.txt
-```
-
-# Build Palmetto Enivronment
+# Build Palmetto Enivronment / Locally
 Instructions made with the ```cuuser_luyangz_ece_8930_advanced_robo``` account.
 ## Conda setup
 ```

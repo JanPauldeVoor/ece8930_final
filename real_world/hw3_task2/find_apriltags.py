@@ -9,10 +9,11 @@ def order_corners(corners):
     """
     # Sort by y-coordinate to separate top and bottom
     corners = sorted(corners, key=lambda c: c[1])
-    top_corners = sorted(corners[:2], key=lambda c: c[0])
-    bottom_corners = sorted(corners[2:], key=lambda c: c[0], reverse=True)
+    top_corners = sorted(corners[2:], key=lambda c: c[0], reverse=True)
+    bottom_corners = sorted(corners[:2], key=lambda c: c[0], reverse=True)
     
     # Return as: TL, TR, BR, BL
+    # Flip from camera perspective to robot perspective, TL->BR, TR->BL, BL->TR, BR->TL
     return np.array([top_corners[0], top_corners[1], bottom_corners[0], bottom_corners[1]], dtype=np.float32)
 
 def detect_apriltag_corners(image_path):

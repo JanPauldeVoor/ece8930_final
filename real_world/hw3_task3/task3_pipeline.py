@@ -28,26 +28,21 @@ def camera_to_base_frame(P_D435, T_base_D435):
     
     return P_base
 
-# ==========================================
-# --- Mock Offline Test & Report Example ---
-# ==========================================
+#  Mock Offline Test & Report Example 
 if __name__ == "__main__":
-    # 1. Mock inputs from Task 1 (Target observation)
+    # Mock inputs from Task 1 (Target observation)
     target_u = 320         # Pixel X
     target_v = 240         # Pixel Y
     target_Z_c = 0.550     # Depth in meters
     
-    # 2. Mock Intrinsic Matrix (K) from Task 1.1
-    # Replace with np.load("k.npy") when running your real pipeline
+    # Intrinsic Matrix (K) from Task 1.1
     mock_K = np.load("../hw3_task1/k.npy")
 
-    # 3. Mock Extrinsic Matrix (T_base_D435) from Task 2.3
+    # Extrinsic Matrix (T_base_D435) from Task 2.3
     # This is the inverted 4x4 matrix output from your solvePnP script
     mock_T_base_D435 = np.load("../hw3_task2/t_base_d435.npy")
-
-    # --- Execute Pipeline ---
     
-    # Step A: Find P_D435
+    # Find P_D435
     P_D435 = pixel_to_camera_frame(target_u, target_v, target_Z_c, mock_K)
     print(f"1. Target in Camera Frame (P_D435): \n   [X: {P_D435[0]:.4f}, Y: {P_D435[1]:.4f}, Z: {P_D435[2]:.4f}]")
 

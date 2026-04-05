@@ -18,7 +18,6 @@ MARKER_SIZE = 0.015 # 15mm in meters
 dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_250)
 board = cv2.aruco.CharucoBoard((X_SQUARES, Y_SQUARES), SQUARE_SIZE, MARKER_SIZE, dictionary)
 
-# Termination criteria for corner sub-pixel accuracy
 
 # Prepare 3D object points based on physical square size
 # e.g., (0,0,0), (0.025,0,0), (0.05,0,0) ...
@@ -27,9 +26,8 @@ objp = np.zeros((X_SQUARES * Y_SQUARES, 3), np.float32)
 objp[:, :2] = np.mgrid[0:X_SQUARES, 0:Y_SQUARES].T.reshape(-1, 2)
 objp *= SQUARE_SIZE
 
-# Arrays to store object points and image points from all images
-objpoints = [] # 3d points in real world space
-imgpoints = [] # 2d points in image plane
+# 3d points in real world space
+objpoints = [] 
 
 images = glob.glob(f'{IMAGE_DIR}/*.png')
 print(f"Found {len(images)} images. Processing...")
@@ -61,22 +59,19 @@ for fname in images:
         else:
             print(f"Error extracting data from: {fname}")
 
+    # Append 3D coordinates
     objpoints.append(objp)
-    # Refine corner locations
-    # corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-    # imgpoints.append(corners2)
-    # success_count += 1
 
-# cv2.destroyAllWindows()
 print(f"Found corners in {success_count}/{len(images)} images.")
 
 if len(all_charuco_corners) > 0:
-    ret, mtx, dist, rvecs, tvecs = cv2.aruco.calibrateCameraCharuco(charucoCorners=all_charuco_corners, 
-                                                                    charucoIds=all_charuco_ids,
-                                                                    board=board,
-                                                                    imageSize=image_size, 
-                                                                    cameraMatrix=None, 
-                                                                    distCoeffs=None)
+    ret, mtx, dist, rvecs, tvecs = cv2.aruco.calibrateCameraCharuco(
+                                        charucoCorners=all_charuco_corners, 
+                                        charucoIds=all_charuco_ids,
+                                        board=board,
+                                        imageSize=image_size, 
+                                        cameraMatrix=None, 
+                                        distCoeffs=None)
     print(f"Intrinsic Matrix K:\n {mtx}\n")
     print(f"Distortion Coeffs:\n {dist}\n")
 
@@ -87,13 +82,3 @@ if len(all_charuco_corners) > 0:
 else:
     print("ERROR: Failed to get any charuco corners")
     exit(0)
-
-
-    
-# Calculate re-projection error
-# mean_error = 0
-# for i in range(len(objpoints)):
-#     imgpoints2, _ = cv2.projectPoints(objpoints[i], rvecs[i], tvecs[i], mtx, dist)
-#     # error = cv2.norm(all_charuco_corners[i], imgpoints2, cv2.NORM_L2) / len(imgpoints2)
-#     mean_error += error
-# print(f"\nTotal Re-projection Error: {mean_error/len(objpoints):.4f} pixels")
