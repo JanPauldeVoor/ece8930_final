@@ -7,6 +7,10 @@ Simulation Constants
 Structure taken from: https://github.com/ilonajulczuk/gym-so100-c/blob/main/gym_so100/constants.py
 """
 
+# Geom names
+RED_CUBE_GEOM = "red_cube_geom"
+BLUE_CUBE_GEOM = "blue_cube_geom"
+TABLE_GEOM = "table"
 
 DT = 0.02  # 0.02 ms -> 1/0.2 = 50 hz
 FPS = 50

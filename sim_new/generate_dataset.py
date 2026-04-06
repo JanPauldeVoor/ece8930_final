@@ -80,10 +80,10 @@ def calculate_target_quat(target_pos):
 def solve_ik(physics, target_pos, gripper_action):
     original_qpos = physics.data.qpos.copy()
     
-    # 1. Get the mathematically reachable orientation
+    # Get the mathematically reachable orientation
     target_quat = calculate_target_quat(target_pos)
 
-    # 2. Solve IK with a relaxed tolerance
+    # Solve IK with a relaxed tolerance
     result = ik.qpos_from_site_pose(
         physics,
         site_name="ee_site",
@@ -119,7 +119,7 @@ def collect_demonstrations(num_episodes=50):
         physics = env.unwrapped._env.physics
         
         # Get start positions
-        block_pos = physics.named.data.site_xpos['red_block_site'].copy()
+        block_pos = physics.named.data.site_xpos['red_cube_site'].copy()
         start_ee_pos = physics.named.data.site_xpos['ee_site'].copy()
 
         # Define the exact Keyframes (No Noise)
@@ -152,7 +152,7 @@ def collect_demonstrations(num_episodes=50):
                         "observation.state": obs["observation.state"],
                         "action": action,
                         "task": "Touch Cube.",
-                        "language_instruction": "Touch the red block with the gripper."
+                        "language_instruction": "Touch the red cube with the gripper."
                     })
                     
                     obs, reward, terminated, truncated, info = env.step(action)
@@ -168,7 +168,7 @@ def collect_demonstrations(num_episodes=50):
                     "observation.state": obs["observation.state"],
                     "action": action,
                     "task": "Touch Cube.",
-                    "language_instruction": "Touch the red block with the gripper."
+                    "language_instruction": "Touch the red cube with the gripper."
                 })
                 obs, reward, terminated, truncated, info = env.step(action)
             

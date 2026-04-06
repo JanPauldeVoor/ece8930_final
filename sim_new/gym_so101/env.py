@@ -18,18 +18,33 @@ from gym_so101.tasks.single import (
     SO101TouchCubeTask
 )
 
-def sample_so101_box_pose(seed=None):
+def sample_so101_box_pose(num_boxes=2, min_dist=0.04,seed=None):
     x_range = [0.15, 0.2]
     y_range = [-.1, 0.1]
     z_range = [0.05, 0.05]
 
     rng = np.random.RandomState(seed)
-
     ranges = np.vstack([x_range, y_range, z_range])
-    cube_position = rng.uniform(ranges[:, 0], ranges[:, 1])
+    
+    poses = []
+    while len(poses) < num_boxes:
+        candidate_pos = rng.uniform(ranges[:, 0], ranges[:, 1])
+        
+        # Check distance against already accepted poses to avoid overlap
+        collision = False
+        for p in poses:
+            # We only care about XY distance since they share the same Z height
+            if np.linalg.norm(candidate_pos[:2] - p[:2]) < min_dist:
+                collision = True
+                break
+        
+        if not collision:
+            poses.append(candidate_pos)
 
     cube_quat = np.array([1, 0, 0, 0])
-    return np.concatenate([cube_position, cube_quat])
+    
+    # Return a list of complete pose arrays [x, y, z, qw, qx, qy, qz]
+    return [np.concatenate([pos, cube_quat]) for pos in poses]
 
 class SO101Env(gym.Env):
     metadata = {"render_modes": ["rgb_array"], "render_fps": 50}
@@ -167,9 +182,13 @@ class SO101Env(gym.Env):
             self._env.task._random = np.random.RandomState(seed)
 
         if self.task == "SO101Sorting":
-            BOX_POSE[0] = sample_so101_box_pose(seed)  # used in sim reset
-        if self.task == "so101_touch_cube":
-            BOX_POSE[0] = sample_so101_box_pose(seed)  # used in sim reset
+            poses = sample_so101_box_pose(num_boxes=2, seed=seed)
+            BOX_POSE[0] = poses[0]
+            BOX_POSE[1] = poses[1]
+        elif self.task == "so101_touch_cube":
+            poses = sample_so101_box_pose(num_boxes=2, seed=seed)
+            BOX_POSE[0] = poses[0]
+            BOX_POSE[1] = poses[1]
         else:
             raise ValueError(self.task)
 

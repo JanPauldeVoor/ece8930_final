@@ -30,36 +30,46 @@
         <camera name="workspace_cam" pos="0.6 0 0.5" euler="0 0.8 3.1415" fovy="69" />
 
         <!-- Bins -->
-        <body name="left-bin" pos="-0.2 0.7 0.001">
+        <body name="left-bin" pos="0.2 0.2 0.001">
             <!-- four thin walls + a floor -->
-            <geom name="bin_wall" type="box" size="0.06 0.005 0.03" pos=" 0.00  0.06 0.03" />
-            <geom name="bin_wall2" type="box" size="0.06 0.005 0.03" pos=" 0.00 -0.06 0.03" />
-            <geom name="bin_wall3" type="box" size="0.005 0.06 0.03" pos=" 0.06  0.00 0.03" />
-            <geom name="bin_wall4" type="box" size="0.005 0.06 0.03" pos="-0.06  0.00 0.03" />
-            <geom name="bin_floor" type="box" size="0.06 0.06 0.005" pos="0 0 -0.005" />
+            <geom name="left_bin_wall" type="box" size="0.06 0.005 0.03" pos=" 0.00  0.06 0.03" rgba="0 0 1 1"/>
+            <geom name="left_bin_wall2" type="box" size="0.06 0.005 0.03" pos=" 0.00 -0.06 0.03" rgba="0 0 1 1" />
+            <geom name="left_bin_wall3" type="box" size="0.005 0.06 0.03" pos=" 0.06  0.00 0.03" rgba="0 0 1 1"/>
+            <geom name="left_bin_wall4" type="box" size="0.005 0.06 0.03" pos="-0.06  0.00 0.03" rgba="0 0 1 1"/>
+            <geom name="left_bin_floor" type="box" size="0.06 0.06 0.005" pos="0 0 -0.005" rgba="0 0 1 1"/>
             <site name="left_bin_center" pos="0 0 0.02" />
         </body>
-        
+        <body name="rigt-bin" pos="0.2 -0.2 0.001">
+            <!-- four thin walls + a floor -->
+            <geom name="right_bin_wall" type="box" size="0.06 0.005 0.03" pos=" 0.00  0.06 0.03" rgba="1 0 0 1"/>
+            <geom name="right_bin_wall2" type="box" size="0.06 0.005 0.03" pos=" 0.00 -0.06 0.03" rgba="1 0 0 1" />
+            <geom name="right_bin_wall3" type="box" size="0.005 0.06 0.03" pos=" 0.06  0.00 0.03" rgba="1 0 0 1"/>
+            <geom name="right_bin_wall4" type="box" size="0.005 0.06 0.03" pos="-0.06  0.00 0.03" rgba="1 0 0 1"/>
+            <geom name="right_bin_floor" type="box" size="0.06 0.06 0.005" pos="0 0 -0.005" rgba="1 0 0 1"/>
+            <site name="right_bin_center" pos="0 0 0.02" />
+        </body>
+
         <!-- <body name="right_bin" pos="0.3 -0.2 0">
             <geom type="box" size="0.06 0.06 0.002" pos="0 0 0.002" rgba="0 0 1 0.3" contype="0" conaffinity="0"/>
             <site name="right_bin_dropzone" pos="0 0 0.02" size="0.02" rgba="0 1 0 0"/>
         </body> -->
 
-        <!-- Blocks -->
-        <body name="red_box" pos="0.3 0 0.05">
-            <joint name="red_block_joint" type="free" frictionloss="0.01" />
+        <!-- Cubes -->
+        <body name="red_cube_body" pos="0.3 -0.1 0.05">
+            <joint name="red_cube_joint" type="free" frictionloss="0.01" />
             <inertial pos="0 0 0" mass="0.05" diaginertia="0.002 0.002 0.002" />
             <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" pos="0 0 0"
-                size="0.02 0.02 0.02" type="box" name="red_block" rgba="1 0 0 1" />
-            <site name="red_block_site" pos="0.01 0.01 0.01" />
+                size="0.02 0.02 0.02" type="box" name="red_cube_geom" rgba="1 0 0 1" />
+            <site name="red_cube_site" pos="0.01 0.01 0.01" />
         </body>
 
-        <!-- <body name="blue_block" pos="0.2 0.1 0.05">
-            <freejoint/>
-            <geom name="blue_block_geom" type="box" size="0.015 0.015 0.015" rgba="0 0 1 1" mass="0.02" friction="2 0.05 0.0001"/>
-            <site name="blue_block_center" pos="0 0 0" size="0.01" rgba="0 0 1 0"/>
-
-        </body> -->
+        <body name="blue_cube_body" pos="0.3 0.1 0.05">
+            <joint name="blue_body_joint" type="free" frictionloss="0.01" />
+            <inertial pos="0 0 0" mass="0.05" diaginertia="0.002 0.002 0.002" />
+            <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" pos="0 0 0"
+                size="0.02 0.02 0.02" type="box" name="blue_cube_geom" rgba="0 0 1 1" />
+            <site name="blue_cube_site" pos="0.01 0.01 0.01" />
+        </body>
 
     </worldbody>
 

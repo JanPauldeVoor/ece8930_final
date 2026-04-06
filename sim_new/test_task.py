@@ -6,6 +6,7 @@ import imageio
 import gymnasium as gym
 import numpy as np
 import gym_so101
+import os
 
 env = gym.make(
     "gym_so101/SO101TouchCube",
@@ -29,4 +30,5 @@ for _ in range(5):
 
 
 env.close()
-imageio.mimsave("outputs/example.mp4", np.stack(frames), fps=25)
+os.makedirs("local_datasets/tmp", exist_ok=True)
+imageio.mimsave("local_datasets/tmp/example.mp4", np.stack(frames), fps=25)
