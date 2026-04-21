@@ -70,23 +70,21 @@ def calculate_target_quat(target_pos):
     """
     # Calculate the required base rotation (yaw) to look at the target (x,y)
     yaw = np.arctan2(target_pos[1], target_pos[0])
-    
+    yaw = np.round(yaw / (np.pi/2)) * (np.pi/2)
+
     # Generate a quaternion for a Z-axis rotation by 'yaw'
     q_dynamic = np.array([np.cos(yaw / 2.0), 0.0, 0.0, np.sin(yaw / 2.0)])
     
     return q_dynamic
 
 
-def solve_ik(physics, target_pos, gripper_action):
+def solve_ik(physics, target_pos, target_quat, gripper_action):
     original_qpos = physics.data.qpos.copy()
-    
-    # Get  mathematically reachable orientation
-    target_quat = calculate_target_quat(target_pos)
 
     # Solve IK with a relaxed tolerance
     result = ik.qpos_from_site_pose(
         physics,
-        site_name="ee_site",
+        site_name="jaw_center",
         target_pos=target_pos,
         target_quat=target_quat, 
         inplace=False,
@@ -112,9 +110,9 @@ def get_corrected_target(target_pos, z_offset, pinch_offset=0.015):
     """
     # Calculate the yaw angle pointing toward the target
     yaw = np.arctan2(target_pos[1], target_pos[0])
+    yaw = np.round(yaw / (np.pi/2))* (np.pi/2)
     
     # Calculate the local Y-axis vector in world space
-    # (If local X points to the target, local Y is perpendicular to it)
     local_y_world = np.array([-np.sin(yaw), np.cos(yaw), 0.0])
     
     # Apply the offset to shift the ee_site so the fixed jaw sits flush with the cube
@@ -123,6 +121,7 @@ def get_corrected_target(target_pos, z_offset, pinch_offset=0.015):
     corrected_pos[2] += z_offset
     
     return corrected_pos
+
 
 def collect_demonstrations(num_episodes=50):
     env = gym.make(
@@ -147,7 +146,7 @@ def collect_demonstrations(num_episodes=50):
         start_ee_pos = physics.named.data.site_xpos['ee_site'].copy()
 
         # Tune pinch_offset (e.g., +0.015 or -0.015) until the fixed jaw perfectly grazes the cube
-        PINCH_OFFSET = 0.015 
+        PINCH_OFFSET = -0.001
 
         red_cube_hover_pos = get_corrected_target(red_cube_pos, z_offset=0.08, pinch_offset=PINCH_OFFSET)
         red_cube_touch_pos = get_corrected_target(red_cube_pos, z_offset=-0.01, pinch_offset=PINCH_OFFSET)
@@ -164,28 +163,49 @@ def collect_demonstrations(num_episodes=50):
         # Phases: (target_pos, interpolation_steps, settling_steps, gripper_action, apply noise)
         # settling_steps allows the physical simulation to catch up to the IK target
         phases = [
-                # (target_site, offset, interpolation_steps, settling_steps, gripper_action, apply_noise)
-                ('red_cube_site', np.array([0.0, 0.0, 0.08]), 40, 20, 1, True),   # hover over red cube
-                ('red_cube_site', np.array([0.0, 0.0, -0.01]), 30, 20, 1, True),  # touch red cube
-                ('red_cube_site', np.array([0.0, 0.0, -0.01]), 30, 15, 0.02, False), # close gripper
-                ('red_cube_site', np.array([0.0, 0.0, 0.08]), 30, 20, 0.02, False),  # Lift cube   
-                # ('right_bin_center', np.array([0.0, 0.0, 0.08]), 40, 20, 0.02, True),   # Hover right bin
-                # ('right_bin_center', np.array([0.0, 0.0, 0.04]), 30, 20, 1, False),     # Drop Cube  
-            ]
+            # 1. Hover (move to XY position high above the cube, fingers OPEN)
+            ('red_cube_site', np.array([-0.01, 0.0, 0.08]), 40, 20, 1.7, True),   
+            
+            # 2. Descend (move strictly down the Z-axis, fingers still OPEN)
+            ('red_cube_site', np.array([-0.01, 0.0, -0.004]), 30, 20, 1.7, True),  
+            
+            # 3. Grasp (Do not move XY or Z. Just close the fingers. Give it settling steps to physically clamp)
+            ('red_cube_site', np.array([-0.01, 0.0, -0.004]), 10, 30, -1.7, False), 
+            
+            # 4. Lift (move strictly up the Z-axis, fingers remain CLOSED)
+            ('red_cube_site', np.array([-0.01, 0.00, 0.08]), 30, 20, -1.7, False),  
+            ('right_bin_center', np.array([0.0, 0.0, 0.08]), 40, 20, -1.7, False), # Hover right bin
+            ('right_bin_center', np.array([0.0, 0.0, 0.04]), 30, 20, 1, False), # Drop Cube 
+        ]
 
         for target_site, offset, interp_steps, settle_steps, gripper_action, apply_z in phases:
             
-            # Interpolation Phase (Moving smoothly toward a potentially moving target)
+            # 1. Initialize the commanded target position once at the start of the phase
+            cmd_target_pos = physics.named.data.site_xpos['jaw_center'].copy()
+            
+            # 2. Generate static noise ONCE per phase (so the arm doesn't vibrate)
+            noise_offset = np.random.normal(0, 0.005, size=3)
+            if not apply_z:
+                noise_offset[2] = 0.0
+            
+            # Interpolation Phase
             for step in range(interp_steps):
-                fresh_target_pos = physics.named.data.site_xpos[target_site].copy() + offset
-                noisy_target = add_noise(fresh_target_pos, noise_std=0.005, apply_to_z=apply_z)
-
-                current_ee_pos = physics.named.data.site_xpos['ee_site'].copy()
-
-                steps_left = interp_steps - step
-                step_xyz = current_ee_pos + (noisy_target - current_ee_pos) / steps_left
+                # Get the cube's true location and calculate offset
+                fresh_target_pos = physics.named.data.site_xpos[target_site].copy() 
+                fresh_target_pos = get_corrected_target(fresh_target_pos, 0, pinch_offset=PINCH_OFFSET)
+                fresh_target_pos += offset
                 
-                action = solve_ik(physics, step_xyz, gripper_action)
+                # Lock the wrist orientation to the FINAL cube location, not the moving arm
+                target_quat = calculate_target_quat(fresh_target_pos)
+
+                # Apply the static noise
+                noisy_target = fresh_target_pos + noise_offset
+
+                # 3. Smoothly step the COMMANDED position (avoids the lag-snap at step=39)
+                steps_left = interp_steps - step
+                cmd_target_pos = cmd_target_pos + (noisy_target - cmd_target_pos) / steps_left
+                
+                action = solve_ik(physics, cmd_target_pos, target_quat, gripper_action)
     
                 dataset.add_frame({
                     "observation.images.workspace_cam": obs["observation.images.workspace_cam"],
@@ -198,11 +218,15 @@ def collect_demonstrations(num_episodes=50):
                 
                 obs, reward, terminated, truncated, info = env.step(action)
 
-            # Settling Phase (Wait for physics to catch up, still tracking if needed)
+            # Settling Phase
             for _ in range(settle_steps):
-                # Recalculate static target in case the object is sliding while we settle
-                fresh_target_pos = physics.named.data.site_xpos[target_site].copy() + offset
-                action = solve_ik(physics, fresh_target_pos, gripper_action)
+                fresh_target_pos = physics.named.data.site_xpos[target_site].copy() 
+                fresh_target_pos = get_corrected_target(fresh_target_pos, 0, pinch_offset=PINCH_OFFSET)
+                fresh_target_pos += offset
+                
+                target_quat = calculate_target_quat(fresh_target_pos)
+
+                action = solve_ik(physics, fresh_target_pos, target_quat, gripper_action)
 
                 dataset.add_frame({
                     "observation.images.workspace_cam": obs["observation.images.workspace_cam"],
@@ -215,9 +239,6 @@ def collect_demonstrations(num_episodes=50):
                 obs, reward, terminated, truncated, info = env.step(action)
             
             print(f"Phase complete. Reward: {reward:.3f}, Dist to cube: {info.get('is_success', False)}")
-            
-            print(f"Red: {red_cube_pos}\nHover:{red_cube_hover_pos}\nEE:{current_ee_pos}")
-
             
         dataset.save_episode()
         

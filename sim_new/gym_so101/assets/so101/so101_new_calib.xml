@@ -112,6 +112,7 @@
                 <body name="gripper_target" pos="-0.0079 0 -0.09">
                   <site name="ee_site" pos="0 0 0" size="0.01" rgba="1 0 0 0"/>
                 </body>
+                <site name="jaw_center" pos="0.0188 0 -0.0981" size="0.01" rgba="0 1 0 0.5"/>
                 <!-- Intel Realsense wrist cam -->
                 <camera name="wrist_cam" pos="-0.008 -0.06 -0.02" target="gripper_target" fovy="58"/>
                 <!-- Link moving_jaw_so101_v1 -->

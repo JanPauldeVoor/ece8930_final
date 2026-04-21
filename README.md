@@ -41,6 +41,7 @@ conda activate so101-env
 
 # Prepare environment
 conda install ffmpeg=7.1.1 -c conda-forge
+conda install cudnn -c nvidia
 
 pip install -r requirements.txt
 ```
